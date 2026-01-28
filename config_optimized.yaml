@@ -1,0 +1,78 @@
+# Factory Simulation Configuration - OPTIMIZED
+# ============================================
+# This is a TEMPLATE for your optimized configuration.
+# Copy this file to config_optimized.yaml and modify the parameters
+# based on your analysis.
+#
+# Document your changes and reasoning in your optimization report.
+
+# General Simulation Parameters (DO NOT MODIFY)
+simulation:
+  duration_hours: 168          # Keep same as baseline for comparison
+  random_seed: 42              # Keep same for reproducibility
+  debug_mode: false
+
+# Order Arrival Parameters (DO NOT MODIFY)
+order_arrival:
+  interarrival_time_hours: 0.5  # Keep same - this is the demand rate
+
+# Parts Warehouse Parameters
+# TODO: Analyze if parts availability is a constraint
+parts_warehouse:
+  initial_parts: 200            # Consider: Is starting inventory sufficient?
+  capacity: 500                # Consider: Do we need more storage?
+  replenishment_interval_hours: 12  # Consider: More frequent deliveries?
+  replenishment_quantity: 120   # Consider: Larger deliveries?
+
+# Production Line Parameters
+production_line:
+  # TODO: Analyze buffer utilization - are items waiting in queues?
+  buffer_A_B_size: 12           # Consider: Increase if Machine A is blocked
+  buffer_B_C_size: 8           # Consider: Increase if Machine B is blocked
+  
+  machines:
+    - name: "Machine A"
+      processing_time_minutes: 5    # Consider: Can this be reduced?
+      mtbf_hours: 10                # FIXED - cannot modify
+      mttr_hours: 2                 # FIXED - cannot modify
+      
+    - name: "Machine B"
+      processing_time_minutes: 7    # BOTTLENECK - Consider reducing
+      mtbf_hours: 15                # FIXED - cannot modify
+      mttr_hours: 3                 # FIXED - cannot modify
+      
+    - name: "Machine C"
+      processing_time_minutes: 4    # Consider: Already fastest machine
+      mtbf_hours: 12                # FIXED - cannot modify
+      mttr_hours: 2.5               # FIXED - cannot modify
+
+# Finished Products Storage Parameters
+# TODO: Analyze if Machine C is blocked waiting for storage
+finished_storage:
+  capacity: 80                  # Consider: Increase if blocking occurs
+
+# Logistics Parameters
+# TODO: Analyze shipment frequency and delays
+logistics:
+  lorry_capacity: 10            # Consider: Smaller = more frequent shipments
+  driver:
+    car_issue_prob: 0.05        # FIXED - cannot modify
+    issue_delay_hours: 4        # FIXED - cannot modify
+
+# ============================================
+# YOUR OPTIMIZATION NOTES:
+# ============================================
+# Change 1: Increase the buffers to reduce blocking(buffer_A_B_size: 5 -> 12, buffer_B_C_size: 5 -> 8)
+#           Reason: Decouple machines to absorb breakdown variability, therefore it will stop blocking A and C starvation.Trade-off :More work in progress(WIP).
+# Change 2: Increase the finished good storage to prevent Machine C blocking (finished_storage.capacity: 30 ->80)
+#           Reason: If shipping is delayed or waiting to fill a lorry,  storage won't fill instantly and halt Machine C. Trade-off: It increases Inventory(space)
+# Change 3: Reduce lorry capacity to ship more frequently.(lorry_capacity: 20 -> 10)
+#           Reason: The batch policy is depart only when full.So when smaller batches are there it will wait lesser time. Also has lower lead time and less storage blocking. Trade-off : More trips are there.However it will lead to increase the logistic costs.
+# Expected Impact: 
+# - Significant reduction in average lead time due to reduced batching and downstream blocking
+# - Reduced blocking at Machine A and reduced starvation at Machine C through increased buffering
+# - Improved flow stability and smoother operation under machine failures and logistics delays
+# - Lower buffer saturation and fewer stop-and-go effects in the production line
+# - Possible reduction in throughput and machine utilization as a trade-off for faster flow
+# - Increased work-in-progress and finished goods inventory, accepted to improve robustness
+# ============================================
